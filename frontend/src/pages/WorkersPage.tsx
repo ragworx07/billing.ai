@@ -148,16 +148,17 @@ export function WorkersPage() {
   return (
     <div className="min-w-0 space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="font-display text-3xl text-graphite">Labour Master</h1>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Masters · Payroll & Workforce</p>
+          <div className="mt-1 flex items-center gap-3">
+            <h1 className="font-display text-3xl text-graphite">Staff & Payroll Master</h1>
             <span className="rounded-full bg-slate-200/80 px-2.5 py-0.5 text-xs font-bold text-slate-700">
-              {rows.length} {rows.length === 1 ? 'Category' : 'Categories'}
+              {rows.length} {rows.length === 1 ? 'Designation' : 'Designations'}
             </span>
           </div>
-          <p className="mt-1 text-xs text-slate-500">
-            Manage labour categories, skill descriptions, and default daily wage rates.
+          <p className="mt-1 text-sm font-medium text-slate-500">
+            Manage employee designations, skill roles, standard daily rates, and payroll cost categories.
           </p>
         </div>
 
@@ -170,15 +171,15 @@ export function WorkersPage() {
           }}
         >
           <Plus className="h-4 w-4" />
-          New Labour
+          Add Designation
         </button>
       </div>
 
       {/* Main Labour Master Card with Search & Filters */}
-      <SectionCard title="Labour Master List">
+      <SectionCard title="Staff & Payroll Master Register">
         {isError ? (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {getApiErrorMessage(error, 'Unable to load labour master list.')}
+            {getApiErrorMessage(error, 'Unable to load staff and payroll master list.')}
           </div>
         ) : null}
 
@@ -262,14 +263,14 @@ export function WorkersPage() {
         <DataTable
           auditTableName="workers"
           auditRecordIds={sortedRows.map((item) => item.id)}
-          auditRecordLabel="Labour record"
+          auditRecordLabel="Staff designation"
           size="roomy"
-          printTitle="Labour Master List"
+          printTitle="Staff & Payroll Master Register"
           printMetadata={{
-            Module: 'Labour Master',
-            'Labour Categories': sortedRows.length,
+            Module: 'Staff & Payroll Master',
+            Designations: sortedRows.length,
           }}
-          headers={['S.No', 'Labour ID', 'Category', 'Skill / Description', 'Cost per Head', 'Wage History', 'Actions']}
+          headers={['S.No', 'Role ID', 'Designation / Role', 'Skill / Description', 'Standard Rate / Day', 'Wage History', 'Actions']}
           rows={sortedRows.map((item, index) => {
             const isEditing = editingId === item.id;
             return [
@@ -401,10 +402,10 @@ export function WorkersPage() {
                 </div>
                 <div>
                   <h2 id="add-labour-modal-title" className="text-base font-bold text-graphite">
-                    Add Labour Master Item
+                    Add Designation / Role
                   </h2>
                   <p className="text-xs text-slate-500">
-                    Define a new labour category, skill role, and default daily wage.
+                    Define a workforce designation, role description, and standard rate.
                   </p>
                 </div>
               </div>
@@ -420,11 +421,11 @@ export function WorkersPage() {
 
             <form className="space-y-4" onSubmit={submit}>
               <div>
-                <RequiredLabel label="Labour Category" required filled={Boolean(form.name.trim())} />
+                <RequiredLabel label="Designation / Role Name" required filled={Boolean(form.name.trim())} />
                 <input
                   autoFocus
                   type="text"
-                  placeholder="e.g. Mason, Helper, Carpenter, Painter..."
+                  placeholder="e.g. Accountant, Sales Executive, Supervisor, Technician..."
                   value={form.name}
                   onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))}
                   required

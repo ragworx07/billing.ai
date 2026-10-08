@@ -157,8 +157,8 @@ export function SettingsPage() {
     <div className="min-w-0 space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate">Application</p>
-          <h1 className="mt-1 font-display text-3xl text-graphite">Settings</h1>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Administration & Preferences</p>
+          <h1 className="mt-1 font-display text-3xl text-graphite">Company & ERP Settings</h1>
         </div>
         <button
           type="button"

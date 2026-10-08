@@ -3189,22 +3189,28 @@ export function ProjectsPage() {
   return (
     <div className="min-w-0 space-y-3 pb-2">
       {!selectedProjectId ? (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-display text-3xl text-graphite">Projects</h1>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Reports & Masters · Cost Centers</p>
+            <h1 className="mt-1 font-display text-3xl text-graphite">Cost Centers / Jobs</h1>
+            <p className="mt-1 text-sm font-medium text-slate-500">
+              Track job costing, project-level budgets, inventory allocations, workforce registers, and profitability.
+            </p>
+          </div>
           {canCreateEditProject ? (
             <button
               type="button"
-              className="rounded-xl bg-graphite px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-black"
+              className="rounded-xl bg-graphite px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-black"
               onClick={() => setShowProjectModal(true)}
             >
-              + New Project
+              + New Cost Center / Job
             </button>
           ) : null}
         </div>
       ) : null}
 
       {!selectedProjectId ? (
-        <SectionCard title="Project List">
+        <SectionCard title="Cost Centers & Jobs Directory">
           <div className="mb-4 grid gap-3 sm:grid-cols-3">
             <input placeholder="Search by project or location" value={search} onChange={(e) => setSearch(e.target.value)} />
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | ProjectStatus)}>

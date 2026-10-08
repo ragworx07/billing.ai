@@ -168,10 +168,10 @@ export function ProjectStatementDocumentPage() {
 
       <header className="statement-header">
         <div className="statement-brand">
-          <img src={kkrLogo} alt="KKR Developers and Foundations" className="statement-logo" />
+          <img src={kkrLogo} alt="Billing ERP" className="statement-logo" />
           <div className="statement-heading">
-            <h1 className="statement-title">Project Statement</h1>
-            <p className="statement-subtitle">Owner report for project cost, collections, vendor payments, files, and site activity.</p>
+            <h1 className="statement-title">Cost Center & Job Statement</h1>
+            <p className="statement-subtitle">Financial statement for job cost, collections, supplier vouchers, and operations.</p>
           </div>
         </div>
         <div className="header-meta">

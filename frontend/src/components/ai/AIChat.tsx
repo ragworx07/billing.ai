@@ -12,7 +12,7 @@ type ChatMessage = {
   response?: AIChatResponse;
 };
 
-const STORAGE_KEY = 'kkr_ai_search_history';
+const STORAGE_KEY = 'billing_erp_ai_search_history';
 
 function createId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -167,18 +167,17 @@ export function AIChat() {
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-white shadow-sm">
                 <Sparkles className="h-3.5 w-3.5" />
-                KKR AI Assistant
+                Billing ERP · AI Assistant
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
                 Live On-Demand
               </span>
             </div>
             <h1 className="mt-2.5 font-display text-3xl sm:text-4xl font-extrabold text-graphite">
-              Smart Project & Finance Assistant
+              Smart ERP & Financial Intelligence
             </h1>
             <p className="mt-1.5 max-w-3xl text-sm sm:text-base font-medium text-slate-600">
-              Every question becomes a read-only SQL query over your live database, answered as a chart or
-              table. Missing a detail? I will ask for it one question at a time.
+              Instant natural-language queries across ledgers, vouchers, receivables, stock items, and P&L financial reports.
             </p>
           </div>
 

@@ -243,10 +243,10 @@ export function ProfitLossPage() {
       <div className="rounded-[28px] border border-white/70 bg-white/90 p-5 shadow-panel">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-slate-500">Profit and loss</p>
-            <h1 className="font-display text-3xl text-graphite">P & L</h1>
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-clay">Reports · Financial Statements</p>
+            <h1 className="mt-1 font-display text-3xl text-graphite">Profit & Loss Statement (P&L)</h1>
             <p className="mt-1 max-w-3xl text-sm text-slate-600">
-              Budget remaining vs actual profit using project rate, expenses incurred, and client payments received.
+              Revenue recognized, cost of goods & services, operational overheads, and net profit margins across cost centers.
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-right">

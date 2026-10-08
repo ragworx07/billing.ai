@@ -9,7 +9,7 @@ export function ProtectedRoute({ allowedRoles }: { allowedRoles?: string[] }) {
   const { user, token, isAuthReady, connectionError, retryBootstrap, logout } = useAuth();
 
   if (!isAuthReady) {
-    return <BuildingLoader label="Building KKR workspace" fullPage />;
+    return <BuildingLoader label="Initializing Billing ERP workspace" fullPage />;
   }
 
   // If initial connection to backend failed (e.g. Supabase DNS or offline) but user has token

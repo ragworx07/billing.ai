@@ -298,8 +298,9 @@ export function UserAccessPage() {
     <div className="min-w-0 space-y-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="font-display text-3xl text-graphite">User Access & Permission Control</h1>
-          <p className="mt-1 text-sm text-slate-600">Categorize, compare, and customize precise access rights across all modules for every user role.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Administration · Security & Roles</p>
+          <h1 className="mt-1 font-display text-3xl text-graphite">User & Role Access Controls</h1>
+          <p className="mt-1 text-sm text-slate-600">Categorize, compare, and customize security levels and voucher permissions for every user role.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {/* View Mode Toggle */}

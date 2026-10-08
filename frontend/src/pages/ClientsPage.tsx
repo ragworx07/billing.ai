@@ -1311,19 +1311,25 @@ export function ClientsPage() {
 
   return (
       <div className="min-w-0 space-y-6">
-      <h1 className="font-display text-3xl text-graphite">Clients - JV Redevelopment</h1>
+      <div>
+        <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Masters · Sundry Debtors</p>
+        <h1 className="mt-1 font-display text-3xl text-graphite">Customers & Debtor Ledgers</h1>
+        <p className="mt-1 text-sm font-medium text-slate-500">
+          Manage customer accounts, debtor balances, receivable schedules, and cost-center client ledgers.
+        </p>
+      </div>
       {!selectedProjectId ? (
-        <SectionCard title="Project-wise Client Ledger">
+        <SectionCard title="Customer Accounts & Debtor Ledger Summary">
           <DataTable
             auditTableName="projects"
             auditRecordIds={projects.map((item) => item.project_id)}
-            auditRecordLabel="Project"
+            auditRecordLabel="Customer Ledger"
             size="roomy"
-            printTitle="Project-wise Client Ledger"
+            printTitle="Customer Accounts & Debtor Ledger"
             printMetadata={{
-              Module: 'Clients - JV Redevelopment',
-              Scope: 'All projects',
-              Projects: projects.length,
+              Module: 'Customers (Debtors)',
+              Scope: 'All Accounts',
+              Accounts: projects.length,
             }}
             headers={['Project', 'Location', 'Client', 'Total Budget', 'Total Due', 'Total Paid', 'Balance', 'Action']}
             rows={projects.map((item) => {
@@ -1357,16 +1363,16 @@ export function ClientsPage() {
       ) : null}
 
       {selectedProjectId && !ledger ? (
-        <SectionCard title={selectedProjectSummary?.project_name || 'JV Ledger'}>
+        <SectionCard title={selectedProjectSummary?.project_name || 'Customer Ledger'}>
           {ledgerError ? (
             <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-              {getApiErrorMessage(ledgerError, 'Unable to load the client JV ledger for this project.')}
+              {getApiErrorMessage(ledgerError, 'Unable to load the customer ledger for this account.')}
             </div>
           ) : ledgerFetching ? (
             <TableSkeleton rows={6} columns={6} />
           ) : (
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-              Select a project to load the client JV ledger.
+              Select an account to load the customer ledger.
             </div>
           )}
           <button

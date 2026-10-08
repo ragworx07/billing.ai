@@ -110,8 +110,9 @@ export function MaterialEntryPage() {
     <div className="min-w-0 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-graphite">Items & Stock Master</h1>
-          <p className="text-sm text-slate-500">Inventory item catalog, units of measurement, and default purchase/sales rates.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Masters · Inventory & Stock</p>
+          <h1 className="mt-1 font-display text-3xl text-graphite">Items & Stock Master</h1>
+          <p className="mt-1 text-sm font-medium text-slate-500">Inventory item catalog, units of measurement, and default purchase/sales rates.</p>
         </div>
         {canAddMaterialMaster ? (
           <button

@@ -29,11 +29,11 @@ const initialForm = {
 };
 
 function titleForParty(type: PartyType) {
-  return type === 'material_vendor' ? 'Vendor' : 'Labour Incharge';
+  return type === 'material_vendor' ? 'Supplier (Creditor)' : 'Contractor / Incharge';
 }
 
 function historyLabel(type?: PartyType) {
-  return type === 'labour_incharge' ? 'Labour Incharge Payment History' : 'Vendor Payment History';
+  return type === 'labour_incharge' ? 'Contractor Payment History' : 'Supplier Payment History';
 }
 
 export function VendorsPage() {
@@ -180,7 +180,7 @@ export function VendorsPage() {
           size="roomy"
           printTitle={`${label} Master List`}
           printMetadata={{
-            Module: type === 'material_vendor' ? 'Material Vendors' : 'Labour Incharges',
+            Module: type === 'material_vendor' ? 'Suppliers (Creditors)' : 'Contractors & Incharges',
             Records: rows.length,
           }}
           headers={['S.No.', `${label} ID`, 'Name', 'Field of Work', 'Phone', 'Address', 'Payment History', 'Actions']}
@@ -280,14 +280,20 @@ export function VendorsPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="min-w-0 font-display text-3xl text-graphite">
-          {canViewVendors && canViewIncharges
-            ? 'Vendors & Labour Incharges'
-            : canViewIncharges
-              ? 'Labour Incharges'
-              : 'Vendors'}
-        </h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Masters · Sundry Creditors</p>
+          <h1 className="mt-1 font-display text-3xl text-graphite">
+            {canViewVendors && canViewIncharges
+              ? 'Suppliers & Creditor Accounts'
+              : canViewIncharges
+                ? 'Contractors & Service Incharges'
+                : 'Suppliers (Creditors)'}
+          </h1>
+          <p className="mt-1 text-sm font-medium text-slate-500">
+            Manage supplier ledgers, sundry creditor master list, contractor accounts, and payment history.
+          </p>
+        </div>
         <div
           role="tablist"
           aria-label="Vendors page view"

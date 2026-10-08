@@ -510,7 +510,7 @@ export function ProjectAnalyticsPage() {
             <div className="min-w-0">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-sm font-semibold text-navy shadow-sm">
                 <Sparkles className="h-4 w-4" />
-                Project Analytics
+                Cost Center & Job Analytics
               </div>
               <h1 className="mt-3 font-display text-4xl leading-tight text-graphite sm:text-5xl">{statement.project.project_name}</h1>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
@@ -528,7 +528,7 @@ export function ProjectAnalyticsPage() {
                 </span>
               </div>
               <p className="mt-3 max-w-3xl text-sm text-slate-600 sm:text-base">
-                Track material usage, labour activity, and money spend across the project lifecycle with a single project-wide analytics workspace.
+                Track inventory consumption, workforce allocation, and financial balances across the job lifecycle with a unified cost-center analytics view.
               </p>
             </div>
           </div>

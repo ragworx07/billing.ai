@@ -354,10 +354,10 @@ export function SiteExpensesPage() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-700 flex items-center gap-1.5">
-            <HardHat className="h-4 w-4" /> Site Expenses Tab
+            <ReceiptText className="h-4 w-4" /> Vouchers · Operating Expenses (F7)
           </p>
-          <h1 className="mt-1 font-display text-3xl text-graphite">Site expenses</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate">Track safety gear, scaffolding, water tankers, site tea/snacks, fuel, tools, and all site-level overhead expenses. Tag each item to a project, to Office, or to Other.</p>
+          <h1 className="mt-1 font-display text-3xl text-graphite">Operating Expenses & Vouchers</h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate">Track operational costs, consumables, logistics, utilities, and field expenses. Allocate to cost centers, central office, or general overheads.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2 rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm font-semibold text-slate shadow-sm">
@@ -372,7 +372,7 @@ export function SiteExpensesPage() {
           </div>
           {canExpenseEntry ? (
             <button type="button" className="inline-flex items-center gap-2 rounded-2xl bg-amber-800 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-graphite" onClick={openAddModal}>
-              <Plus className="h-4 w-4" /> Add site item
+              <Plus className="h-4 w-4" /> Add Expense Voucher
             </button>
           ) : null}
         </div>
@@ -382,24 +382,24 @@ export function SiteExpensesPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition hover:shadow-md">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Site Expenses</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Total Operating Expenses</span>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-800">
               <ReceiptText className="h-5 w-5" />
             </div>
           </div>
           <p className="mt-2 font-display text-3xl font-black text-slate-900">{formatCurrency(grandTotalExpenses)}</p>
-          <p className="mt-1 text-xs text-slate-500">{expenses.length} total site expense entries</p>
+          <p className="mt-1 text-xs text-slate-500">{expenses.length} total expense voucher entries</p>
         </div>
 
         <div className="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-5 shadow-xs transition hover:shadow-md">
           <div className="flex items-center justify-between text-indigo-700">
-            <span className="text-xs font-bold uppercase tracking-wider">Tagged to Projects</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Cost Centers / Jobs</span>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-800">
               <HardHat className="h-5 w-5" />
             </div>
           </div>
           <p className="mt-2 font-display text-3xl font-black text-indigo-950">{formatCurrency(allocationTotals.project)}</p>
-          <p className="mt-1 text-xs font-semibold text-indigo-700">Counts in project expense totals</p>
+          <p className="mt-1 text-xs font-semibold text-indigo-700">Counts in cost center expense totals</p>
         </div>
 
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-xs transition hover:shadow-md">
@@ -435,11 +435,11 @@ export function SiteExpensesPage() {
         </div>
         {isLoading ? <TableSkeleton rows={6} columns={7} /> : (
           <DataTable
-          printTitle="Site Expenses"
+          printTitle="Operating Expense Vouchers"
           auditTableName="site_expenses"
           auditRecordIds={weekExpenses.map((expense) => expense.id)}
-          auditRecordLabel="Site expense"
-          printMetadata={{ Module: 'Site Expenses', Year: selectedYear, Month: selectedMonth === 'all' ? 'All months' : monthNames[Number(selectedMonth) - 1], Week: selectedWeek === 'all' ? 'All weeks' : weekLabel(selectedWeek), Total: formatCurrency(weekTotal) }}
+          auditRecordLabel="Operating expense voucher"
+          printMetadata={{ Module: 'Operating Expenses', Year: selectedYear, Month: selectedMonth === 'all' ? 'All months' : monthNames[Number(selectedMonth) - 1], Week: selectedWeek === 'all' ? 'All weeks' : weekLabel(selectedWeek), Total: formatCurrency(weekTotal) }}
           headers={canExpenseEntry ? ['Date', 'Item', 'Category', 'Allocated to', 'Rate', 'Qty', 'Total', 'Actions'] : ['Date', 'Item', 'Category', 'Allocated to', 'Rate', 'Qty', 'Total']}
           rows={weekExpenses.map((expense) => {
             const rowItems: ReactNode[] = [

@@ -335,9 +335,9 @@ export function OfficePage() {
     <div className="min-w-0 space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Office tab</p>
-          <h1 className="mt-1 font-display text-3xl text-graphite">Office expenses</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate">Track stationery, pantry items, paper copies, EB, and every expense that does not belong to a project.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Vouchers · Cash & Bank (F4/F5)</p>
+          <h1 className="mt-1 font-display text-3xl text-graphite">Cash & Bank (Office Vouchers)</h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate">Manage cash transactions, administrative disbursements, utility bills, settlements, and non-project operational expenses.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2 rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm font-semibold text-slate shadow-sm">
@@ -352,7 +352,7 @@ export function OfficePage() {
           </div>
           {canExpenseEntry ? (
             <button type="button" className="inline-flex items-center gap-2 rounded-2xl bg-clay px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-graphite" onClick={() => setIsAddOpen(true)}>
-              <Plus className="h-4 w-4" /> Add new item
+              <Plus className="h-4 w-4" /> Add Voucher
             </button>
           ) : null}
         </div>
@@ -363,13 +363,13 @@ export function OfficePage() {
         {/* Total Office Expenses Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition hover:shadow-md">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Office Expenses</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Total Office Disbursements</span>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
               <ReceiptText className="h-5 w-5" />
             </div>
           </div>
           <p className="mt-2 font-display text-3xl font-black text-slate-900">{formatCurrency(grandTotalExpenses)}</p>
-          <p className="mt-1 text-xs text-slate-500">{expenses.length} total office expense entries</p>
+          <p className="mt-1 text-xs text-slate-500">{expenses.length} total office voucher entries</p>
         </div>
 
         {/* Total Settled Card */}
@@ -431,11 +431,11 @@ export function OfficePage() {
         </div>
         {isLoading ? <p className="text-sm text-slate">Loading office expenses...</p> : null}
         <DataTable
-          printTitle="Office Expenses"
+          printTitle="Cash & Bank (Office Vouchers)"
           auditTableName="office_expenses"
           auditRecordIds={weekExpenses.filter((expense) => expense.source === 'office').map((expense) => expense.id)}
-          auditRecordLabel="Office expense"
-          printMetadata={{ Module: 'Office', Year: selectedYear, Month: selectedMonth === 'all' ? 'All months' : monthNames[Number(selectedMonth) - 1], Week: selectedWeek === 'all' ? 'All weeks' : weekLabel(selectedWeek), Total: formatCurrency(weekTotal) }}
+          auditRecordLabel="Cash & bank voucher"
+          printMetadata={{ Module: 'Cash & Bank', Year: selectedYear, Month: selectedMonth === 'all' ? 'All months' : monthNames[Number(selectedMonth) - 1], Week: selectedWeek === 'all' ? 'All weeks' : weekLabel(selectedWeek), Total: formatCurrency(weekTotal) }}
           headers={canExpenseEntry ? ['Date', 'Item', 'Category', 'Source', 'Rate', 'Qty', 'Total', 'Actions'] : ['Date', 'Item', 'Category', 'Source', 'Rate', 'Qty', 'Total']}
           rows={weekExpenses.map((expense) => {
             const rowItems: ReactNode[] = [

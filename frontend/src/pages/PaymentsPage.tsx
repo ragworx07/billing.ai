@@ -917,15 +917,15 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-            {view === 'bills' ? 'Tax invoices' : 'Collections'}
+            {view === 'bills' ? 'Vouchers · Sales (F8)' : 'Vouchers · Receipts (F6)'}
           </p>
           <h1 className="mt-1 font-display text-3xl text-graphite">
-            {view === 'bills' ? 'GST Invoices' : 'Payments'}
+            {view === 'bills' ? 'Sales Invoices (GST Billing)' : 'Receipts & Payments'}
           </h1>
           <p className="mt-1 max-w-2xl text-sm font-medium text-slate-500">
             {view === 'bills'
-              ? 'Create GST tax invoices, see billed totals with CGST/SGST split, and record collections against each invoice.'
-              : 'Log received client payments and review official receipt history.'}
+              ? 'Create GST tax invoices, track billed totals with CGST/SGST split, and record collections against each invoice.'
+              : 'Log received customer payments, reconcile ledgers, and review official receipt vouchers.'}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -947,7 +947,7 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
               onClick={openCreateBillDrawer}
             >
               <Plus className="h-4 w-4" />
-              Create GST Invoice
+              Create Sales Invoice
             </button>
           )}
         </div>
@@ -1253,7 +1253,7 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
                       }}
                     >
                       <Receipt className="h-4 w-4 text-emerald-600" />
-                      Record Payment
+                      Record Receipt (F6)
                     </button>
                   )}
                   <button
@@ -1312,8 +1312,8 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
               <div className="mb-5 flex items-start gap-4 border-b-[3px] border-slate-800 pb-4">
                 <img src={kkrLogo} alt="KKR Logo" className="h-20 w-36 object-contain" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">KKR Developers & Foundations</p>
-                  <h1 className="mt-1 text-2xl font-black text-slate-950">Client Payment Receipts</h1>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Billing ERP · Accounts & Billing</p>
+                  <h1 className="mt-1 text-2xl font-black text-slate-950">Customer Receipt Vouchers Register</h1>
                   <p className="mt-2 text-sm font-semibold text-slate-600">
                     {paymentSummary.monthLabel} | {filteredPayments.length} entries | Total {formatCurrency(paymentSummary.totalAmount)}
                   </p>
@@ -1354,7 +1354,7 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
               <p className="mt-1 text-2xl font-black text-emerald-950">{formatCurrency(paymentSummary.totalAmount)}</p>
             </div>
             <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">Active Projects</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">Cost Centers / Jobs</span>
               <p className="mt-1 text-2xl font-black text-indigo-950">{paymentSummary.projectCount}</p>
             </div>
             <div className="rounded-2xl border border-purple-100 bg-purple-50/50 p-4">
@@ -1451,10 +1451,10 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
                 <FileText className="h-5 w-5 text-amber-600" />
                 <div>
                   <h2 className="text-lg font-black text-graphite">
-                    {editingBillId ? 'Edit GST Invoice' : 'Create GST Invoice'}
+                    {editingBillId ? 'Edit Sales Invoice' : 'Create Sales Invoice'}
                   </h2>
                   <p className="text-xs font-medium text-slate-500">
-                    Generate an official bill with line items and auto-populated client billing address.
+                    Generate an official tax invoice with line items, HSN/SAC codes, and auto-populated customer billing ledger.
                   </p>
                 </div>
               </div>
@@ -1907,8 +1907,8 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
-                <h3 className="text-base font-extrabold text-graphite">Record Bill Payment</h3>
-                <p className="text-xs text-slate-500">Bill: {recordPaymentBill.bill_number}</p>
+                <h3 className="text-base font-extrabold text-graphite">Record Receipt Voucher (F6)</h3>
+                <p className="text-xs text-slate-500">Invoice: {recordPaymentBill.bill_number}</p>
               </div>
               <button type="button" className="p-1 text-slate-400 hover:text-slate-700" onClick={() => setRecordPaymentBill(null)}>
                 <X className="h-5 w-5" />
@@ -1917,8 +1917,8 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
 
             <div className="space-y-3">
               <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs space-y-1">
-                <p className="font-bold text-amber-900">Client: {recordPaymentBill.client_name}</p>
-                <p className="text-amber-800">Total Bill: ₹ {formatCurrency(recordPaymentBill.total_amount)}</p>
+                <p className="font-bold text-amber-900">Customer (Debtor): {recordPaymentBill.client_name}</p>
+                <p className="text-amber-800">Total Invoice: ₹ {formatCurrency(recordPaymentBill.total_amount)}</p>
                 <p className="font-black text-rose-700">Balance Due: ₹ {formatCurrency(recordPaymentBill.balance_amount)}</p>
               </div>
 
@@ -2039,7 +2039,7 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
                     }}
                   >
                     <Receipt className="h-3.5 w-3.5" />
-                    Record Payment
+                    Record Receipt (F6)
                   </button>
                 )}
 

@@ -113,7 +113,7 @@ export function RoleDashboard() {
   return (
     <div className="min-w-0 space-y-6">
       <div className="rounded-[28px] border border-white/60 bg-gradient-to-br from-graphite via-slate-900 to-clay px-6 py-7 text-white shadow-panel sm:px-8">
-        <p className="text-xs uppercase tracking-[0.34em] text-sand/70">KKR Construction</p>
+        <p className="text-xs uppercase tracking-[0.34em] text-sand/70">Billing ERP · Tally Edition</p>
         <div className="mt-2 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div><h1 className="font-display text-4xl leading-tight">Welcome, {user?.name}</h1><p className="mt-2 max-w-2xl text-sm text-white/75">Your dashboard is focused on the records and follow-ups assigned to your role.</p></div>
           <span className="inline-flex w-fit rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white/85">{category.label}</span>
@@ -123,16 +123,16 @@ export function RoleDashboard() {
       {isClientManager ? (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <ActionCard label="Client balance" value={formatCurrency(totalClientBalance)} detail={`${jvProjects.filter((project) => project.total_balance > 0).length} project balance(s) pending`} href="/clients" icon={Users} tone="rose" />
-            <ActionCard label="Overdue payments" value={overduePayments.length} detail="Open the payment list to follow up" href="/payments" icon={AlertTriangle} tone="amber" />
+            <ActionCard label="Customer balance" value={formatCurrency(totalClientBalance)} detail={`${jvProjects.filter((project) => project.total_balance > 0).length} customer balance(s) pending`} href="/clients" icon={Users} tone="rose" />
+            <ActionCard label="Overdue payments" value={overduePayments.length} detail="Open the receipt list to follow up" href="/payments" icon={AlertTriangle} tone="amber" />
             <ActionCard label="Office this week" value={formatCurrency(totalOfficeAmount)} detail={`${openOfficeItems} open office item(s)`} href="/office" icon={Building2} tone="indigo" />
             <ActionCard label="Upcoming milestones" value={upcomingMilestones.length} detail="Due within the next 14 days" href="/milestones" icon={CalendarCheck2} tone="emerald" />
           </div>
           <div className="grid gap-5 xl:grid-cols-2">
-            <SectionCard title="Client balances needing attention">
+            <SectionCard title="Customer balances needing attention">
               {jvProjects.filter((project) => project.total_balance > 0).slice(0, 6).map((project) => <Link key={project.project_id} to={`/projects?projectId=${project.project_id}`} className="flex items-center justify-between gap-3 border-b border-slate-100 py-3 last:border-0 hover:text-clay"><span className="min-w-0 truncate text-sm font-bold">{project.client_name} · {project.project_name}</span><span className="shrink-0 text-sm font-black text-rose-700">{formatCurrency(project.total_balance)}</span></Link>)}
-              {!jvProjects.some((project) => project.total_balance > 0) ? <p className="text-sm font-semibold text-slate-500">No outstanding client balances.</p> : null}
-              <Link to="/clients" className="mt-3 inline-flex items-center gap-1 text-sm font-black text-clay">Open client details <ArrowRight className="h-4 w-4" /></Link>
+              {!jvProjects.some((project) => project.total_balance > 0) ? <p className="text-sm font-semibold text-slate-500">No outstanding customer balances.</p> : null}
+              <Link to="/clients" className="mt-3 inline-flex items-center gap-1 text-sm font-black text-clay">Open customer details <ArrowRight className="h-4 w-4" /></Link>
             </SectionCard>
             <SectionCard title="Overdue follow-ups">
               {overduePayments.slice(0, 6).map((payment) => <Link key={payment.id} to="/payments" className="flex items-center justify-between gap-3 border-b border-slate-100 py-3 last:border-0 hover:text-clay"><span className="text-sm font-bold">Project #{payment.project_id} · {payment.payment_type}</span><span className="text-sm font-black text-rose-700">{formatCurrency(payment.amount)}</span></Link>)}
@@ -165,12 +165,12 @@ export function RoleDashboard() {
             {hasAnyPermission(user?.role, ['tab_vendors', 'labour_incharge_detail']) ? (
               <ActionCard
                 label={hasAnyPermission(user?.role, ['tab_vendors']) && hasAnyPermission(user?.role, ['labour_incharge_detail'])
-                  ? 'Vendors & incharges'
+                  ? 'Suppliers & Creditors'
                   : hasAnyPermission(user?.role, ['labour_incharge_detail'])
-                    ? 'Labour incharges'
-                    : 'Vendors'}
+                    ? 'Contractors & Incharges'
+                    : 'Suppliers'}
                 value={vendors.length}
-                detail="Open the vendor directory"
+                detail="Open the supplier ledger directory"
                 href="/vendors"
                 icon={Truck}
               />

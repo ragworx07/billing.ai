@@ -649,9 +649,10 @@ export function DashboardPage() {
       {/* Header Title Area */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-black tracking-tight text-graphite">Command Center</h1>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Gateway of ERP · Overview</p>
+          <h1 className="mt-1 font-display text-3xl font-black tracking-tight text-graphite">Company Financial Gateway</h1>
           <p className="text-xs text-muted mt-1 font-medium">
-            {data.project_health.filter((p) => p.status === 'ongoing').length} active projects · updated {lastUpdatedTime}
+            {data.project_health.filter((p) => p.status === 'ongoing').length} active cost centers / projects · updated {lastUpdatedTime}
           </p>
         </div>
         <div className="flex min-w-0 flex-wrap items-center gap-3">
