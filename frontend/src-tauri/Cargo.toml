@@ -1,0 +1,20 @@
+[package]
+name = "kkr_erp_desktop"
+version = "1.0.0"
+edition = "2021"
+description = "KKR ERP Desktop Shell"
+authors = ["KKR ERP Team"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-process = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

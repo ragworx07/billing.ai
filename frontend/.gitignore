@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local env
+.env
+.env.local
+
+# Tooling
+*.tsbuildinfo
+
+# OS/editor
+.DS_Store
+.vscode/

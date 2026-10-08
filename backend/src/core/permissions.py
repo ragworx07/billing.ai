@@ -1,0 +1,28 @@
+from src.data.models.postgres.enums import UserRole
+
+ADMIN_ROLES = (UserRole.OWNER, UserRole.ADMINISTRATOR)
+
+
+ASSIGNED_ROLES = (
+    *ADMIN_ROLES,
+    UserRole.CLIENT_MANAGER,
+    UserRole.PROJECT_MANAGER,
+    UserRole.PROJECT_COORDINATOR,
+    UserRole.SUPERVISOR,
+    UserRole.ACCOUNTANT,
+)
+
+CLIENT_ROLES = ASSIGNED_ROLES
+PROJECT_ROLES = ASSIGNED_ROLES
+PROJECT_WRITE_ROLES = ASSIGNED_ROLES
+PROJECT_MATERIAL_EXPENSE_ROLES = ASSIGNED_ROLES
+MASTER_WRITE_ROLES = ASSIGNED_ROLES
+FINANCE_ROLES = ASSIGNED_ROLES
+
+
+def is_project_operator(user: object) -> bool:
+    return getattr(user, "role", None) in {
+        UserRole.PROJECT_MANAGER,
+        UserRole.PROJECT_COORDINATOR,
+        UserRole.SUPERVISOR,
+    }

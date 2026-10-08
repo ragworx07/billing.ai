@@ -1,0 +1,29 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.mypy_cache/
+.pytest_cache/
+
+# Virtual environments
+.venv
+
+# Local env/config
+.env
+*.json
+!pyproject.toml
+!alembic.ini
+!skills-lock.json
+
+# Google Drive credentials & tokens
+client_secret*.json
+gdrive*.json
+kkr-erp*.json
+
+# OS/editor
+.DS_Store
+.vscode/
+
