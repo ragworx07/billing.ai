@@ -198,6 +198,11 @@ export const api = {
   deleteMaterial: async (materialId: number) => (await http.delete(`/materials/${materialId}`)).data,
   getMaterials: async (projectId?: number) =>
     (await http.get<MaterialLog[]>('/materials/', { params: projectId ? { project_id: projectId } : undefined })).data,
+  uploadMaterialBill: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return (await http.post<{ url: string }>('/materials/upload', formData)).data;
+  },
   createExpense: async (payload: Partial<ExpenseLog>) =>
     (await http.post<ExpenseLog>('/expenses/', payload)).data,
   updateExpense: async (expenseId: number, payload: Partial<ExpenseLog>) =>

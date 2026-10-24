@@ -385,7 +385,7 @@ export function DashboardPage() {
   }, []);
 
   const dashboardCalendar = useMemo(() => {
-    if (!calendarData) return null;
+    if (!calendarData || !Array.isArray(calendarData.days)) return null;
     const year = Number(calendarMonth.slice(0, 4));
     const month = Number(calendarMonth.slice(5, 7));
     const firstDay = new Date(year, month - 1, 1).getDay();
@@ -411,7 +411,7 @@ export function DashboardPage() {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${calendarMonth}-${String(day).padStart(2, '0')}`;
-      const dayData = calendarData.days.find((d) => d.date === dateStr);
+      const dayData = calendarData.days?.find((d) => d.date === dateStr);
       const dayMilestones = milestonesByDate.get(dateStr) || [];
       gridDays.push({
         key: dateStr,
@@ -434,12 +434,12 @@ export function DashboardPage() {
   }, [calendarData, calendarMonth, milestonesByDate, selectedCalendarDate]);
 
   const filteredTransactions = useMemo(() => {
-    if (!calendarData) return [];
+    if (!calendarData || !Array.isArray(calendarData.days)) return [];
     let list: any[] = [];
 
     if (calendarViewMode === 'day') {
       if (selectedCalendarDate) {
-        const dayData = calendarData.days.find((d) => d.date === selectedCalendarDate);
+        const dayData = calendarData.days?.find((d) => d.date === selectedCalendarDate);
         list = dayData?.transactions || [];
       }
     } else {
@@ -862,12 +862,12 @@ export function DashboardPage() {
 
       {/* Top Combined Collection Summary Bar (Image 2 Exact Match) */}
       {(() => {
-        const portfolioQuoted = data.cards.find(c => c.label === "Portfolio Quoted")?.value || 0;
-        const totalCost = data.cards.find(c => c.label === "Total Cost")?.value || 0;
-        const totalReceived = data.cards.find(c => c.label === "Total Received")?.value || 0;
-        const outstanding = data.cards.find(c => c.label === "Outstanding")?.value || 0;
-        const activeProjectsCount = data.cards.find(c => c.label === "Total Active Projects")?.value || 0;
-        const collectionEfficiency = data.cards.find(c => c.label === "Collection Efficiency %")?.value || 0;
+        const portfolioQuoted = data?.cards?.find(c => c.label === "Portfolio Quoted")?.value || 0;
+        const totalCost = data?.cards?.find(c => c.label === "Total Cost")?.value || 0;
+        const totalReceived = data?.cards?.find(c => c.label === "Total Received")?.value || 0;
+        const outstanding = data?.cards?.find(c => c.label === "Outstanding")?.value || 0;
+        const activeProjectsCount = data?.cards?.find(c => c.label === "Total Active Projects")?.value || 0;
+        const collectionEfficiency = data?.cards?.find(c => c.label === "Collection Efficiency %")?.value || 0;
 
         const costPercent = portfolioQuoted > 0 ? (totalCost / portfolioQuoted * 100).toFixed(1) : '0';
         const receivedPercent = portfolioQuoted > 0 ? (totalReceived / portfolioQuoted * 100).toFixed(1) : '0';
@@ -1278,7 +1278,7 @@ export function DashboardPage() {
               // Current month: Show Today's Flow
               (() => {
                 const todayStr = localDateKey();
-                const todayData = dashboardCalendar?.days.find(d => d.dateStr === todayStr);
+                const todayData = dashboardCalendar?.days?.find(d => d.dateStr === todayStr);
                 const hasTodayActivity = todayData && (todayData.spent > 0 || todayData.received > 0);
 
                 return (
