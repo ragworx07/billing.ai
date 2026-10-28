@@ -3,11 +3,16 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import {
+  AlertTriangle,
   ArrowDownAZ,
   ArrowUpAZ,
+  BarChart2,
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   CircleDollarSign,
+  Clock,
   Download,
   Eye,
   FileCheck,
@@ -24,6 +29,7 @@ import {
   SlidersHorizontal,
   FileSpreadsheet,
   Trash2,
+  TrendingUp,
   UserCheck,
   Users2,
   Wallet,
@@ -251,6 +257,14 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
   const [viewingBill, setViewingBill] = useState<Bill | null>(null);
   const [previewBill, setPreviewBill] = useState<Bill | null>(null);
   const [recordPaymentBill, setRecordPaymentBill] = useState<Bill | null>(null);
+
+  // Date range filter state
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
+
+  // Client grouped view
+  const [groupedViewOpen, setGroupedViewOpen] = useState(false);
+  const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
 
   // Record Payment Modal Form State
   const [recordPaymentForm, setRecordPaymentForm] = useState({
@@ -696,9 +710,56 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
         const projMatch = (b.project_name || '').toLowerCase().includes(search);
         if (!clientMatch && !billNumMatch && !projMatch) return false;
       }
+      // Date range filter
+      if (dateFrom && b.bill_date < dateFrom) return false;
+      if (dateTo && b.bill_date > dateTo) return false;
       return true;
     });
-  }, [bills, projectFilter, shareholderFilter, billStatusFilter, clientFilter]);
+  }, [bills, projectFilter, shareholderFilter, billStatusFilter, clientFilter, dateFrom, dateTo]);
+
+  // Invoice aging summary
+  const agingSummary = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const buckets = { current: 0, days30: 0, days60: 0, days90plus: 0,
+      currentAmt: 0, days30Amt: 0, days60Amt: 0, days90plusAmt: 0 };
+    filteredBills.forEach((b) => {
+      if (b.status === 'paid') return;
+      const due = new Date(b.due_date);
+      due.setHours(0, 0, 0, 0);
+      const diffDays = Math.floor((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
+      const bal = Number(b.balance_amount || 0);
+      if (diffDays <= 0) { buckets.current++; buckets.currentAmt += bal; }
+      else if (diffDays <= 30) { buckets.days30++; buckets.days30Amt += bal; }
+      else if (diffDays <= 60) { buckets.days60++; buckets.days60Amt += bal; }
+      else { buckets.days90plus++; buckets.days90plusAmt += bal; }
+    });
+    return buckets;
+  }, [filteredBills]);
+
+  // Overdue invoices (unpaid/partial and past due date)
+  const overdueInvoices = useMemo(() => {
+    const today = localDateKey();
+    return filteredBills.filter(
+      (b) => b.status !== 'paid' && b.due_date < today && Number(b.balance_amount || 0) > 0
+    );
+  }, [filteredBills]);
+
+  // Client-wise grouped totals
+  const clientGroupedTotals = useMemo(() => {
+    const map = new Map<string, { clientName: string; count: number; totalBilled: number; totalPaid: number; totalBalance: number; bills: typeof filteredBills }>();
+    filteredBills.forEach((b) => {
+      const key = b.client_name || 'Unknown';
+      const existing = map.get(key) || { clientName: key, count: 0, totalBilled: 0, totalPaid: 0, totalBalance: 0, bills: [] };
+      existing.count++;
+      existing.totalBilled += Number(b.total_amount || 0);
+      existing.totalPaid += Number(b.paid_amount || 0);
+      existing.totalBalance += Number(b.balance_amount || 0);
+      existing.bills.push(b);
+      map.set(key, existing);
+    });
+    return Array.from(map.values()).sort((a, b) => b.totalBilled - a.totalBilled);
+  }, [filteredBills]);
 
   // Bill KPI Summary
   const billSummary = useMemo(() => {
@@ -955,6 +1016,47 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
 
       {view === 'bills' && (
         <div className="space-y-5">
+
+          {/* ── Overdue Warning Banner ── */}
+          {overdueInvoices.length > 0 && (
+            <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3.5 shadow-sm">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-black text-rose-800">
+                  {overdueInvoices.length} overdue invoice{overdueInvoices.length > 1 ? 's' : ''} require attention
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-rose-600">
+                  Total overdue balance: <span className="font-black">{formatCurrency(overdueInvoices.reduce((s, b) => s + Number(b.balance_amount || 0), 0))}</span>
+                  {' · '}
+                  <button
+                    type="button"
+                    className="underline underline-offset-2 hover:text-rose-800 font-bold transition"
+                    onClick={() => setBillStatusFilter('unpaid')}
+                  >
+                    View unpaid invoices
+                  </button>
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-wrap gap-1.5">
+                {overdueInvoices.slice(0, 3).map((b) => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    className="rounded-lg bg-rose-100 px-2 py-1 text-[10px] font-black text-rose-800 hover:bg-rose-200 transition"
+                    onClick={() => setPreviewBill(b)}
+                    title={`Due: ${formatDate(b.due_date)}`}
+                  >
+                    {b.bill_number}
+                  </button>
+                ))}
+                {overdueInvoices.length > 3 && (
+                  <span className="rounded-lg bg-rose-100 px-2 py-1 text-[10px] font-bold text-rose-700">
+                    +{overdueInvoices.length - 3} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
           <section className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-sm">
             <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {/* 1. Total Billed */}
@@ -1053,6 +1155,115 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
             </div>
           </section>
 
+          {/* ── Invoice Aging Summary ── */}
+          {(agingSummary.current + agingSummary.days30 + agingSummary.days60 + agingSummary.days90plus) > 0 && (
+            <section className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-sm">
+              <div className="mb-2.5 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-amber-600" />
+                <span className="text-xs font-black uppercase tracking-wider text-slate-600">Invoice Aging</span>
+                <span className="ml-auto text-[11px] font-semibold text-slate-400">Unpaid &amp; partially paid only</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                <div className="flex flex-col rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-2.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700">Current</span>
+                  <span className="mt-1 text-base font-black text-emerald-950">{agingSummary.current}</span>
+                  <span className="text-[10px] font-semibold text-emerald-700">{formatCurrency(agingSummary.currentAmt)}</span>
+                  <span className="mt-0.5 text-[9px] text-emerald-600">Not yet due</span>
+                </div>
+                <div className="flex flex-col rounded-xl border border-amber-200/80 bg-amber-50/50 p-2.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-700">1–30 Days</span>
+                  <span className="mt-1 text-base font-black text-amber-950">{agingSummary.days30}</span>
+                  <span className="text-[10px] font-semibold text-amber-700">{formatCurrency(agingSummary.days30Amt)}</span>
+                  <span className="mt-0.5 text-[9px] text-amber-600">Mildly overdue</span>
+                </div>
+                <div className="flex flex-col rounded-xl border border-orange-200/80 bg-orange-50/50 p-2.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-orange-700">31–60 Days</span>
+                  <span className="mt-1 text-base font-black text-orange-950">{agingSummary.days60}</span>
+                  <span className="text-[10px] font-semibold text-orange-700">{formatCurrency(agingSummary.days60Amt)}</span>
+                  <span className="mt-0.5 text-[9px] text-orange-600">Follow up needed</span>
+                </div>
+                <div className="flex flex-col rounded-xl border border-rose-200/80 bg-rose-50/50 p-2.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-700">60+ Days</span>
+                  <span className="mt-1 text-base font-black text-rose-950">{agingSummary.days90plus}</span>
+                  <span className="text-[10px] font-semibold text-rose-700">{formatCurrency(agingSummary.days90plusAmt)}</span>
+                  <span className="mt-0.5 text-[9px] text-rose-600">Urgent recovery</span>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── Client-wise Grouped Totals Toggle ── */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white shadow-sm overflow-hidden">
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 px-4 py-3 hover:bg-slate-50 transition"
+              onClick={() => setGroupedViewOpen((v) => !v)}
+            >
+              <Users2 className="h-4 w-4 text-indigo-600" />
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700">Client-wise Grouped Totals</span>
+              <span className="ml-auto flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-slate-400">{clientGroupedTotals.length} client{clientGroupedTotals.length !== 1 ? 's' : ''}</span>
+                {groupedViewOpen ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
+              </span>
+            </button>
+            {groupedViewOpen && (
+              <div className="border-t border-slate-100 divide-y divide-slate-100">
+                {clientGroupedTotals.map((group) => (
+                  <div key={group.clientName} className="px-4 py-3">
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 text-left"
+                      onClick={() => setExpandedClients((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(group.clientName)) next.delete(group.clientName); else next.add(group.clientName);
+                        return next;
+                      })}
+                    >
+                      <span className="min-w-0 flex-1 truncate text-sm font-bold text-slate-900">{group.clientName}</span>
+                      <div className="flex shrink-0 items-center gap-4 text-xs">
+                        <span className="text-slate-500"><span className="font-black text-slate-800">{group.count}</span> inv.</span>
+                        <span className="text-slate-500">Billed: <span className="font-black text-graphite">{formatCurrency(group.totalBilled)}</span></span>
+                        <span className="text-emerald-700">Paid: <span className="font-black">{formatCurrency(group.totalPaid)}</span></span>
+                        <span className="text-rose-600">Balance: <span className="font-black">{formatCurrency(group.totalBalance)}</span></span>
+                        {expandedClients.has(group.clientName) ? <ChevronDown className="h-3.5 w-3.5 text-slate-400" /> : <ChevronRight className="h-3.5 w-3.5 text-slate-400" />}
+                      </div>
+                    </button>
+                    {/* Progress bar */}
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all"
+                        style={{ width: `${group.totalBilled > 0 ? Math.min(100, (group.totalPaid / group.totalBilled) * 100) : 0}%` }}
+                      />
+                    </div>
+                    {/* Expanded bill list */}
+                    {expandedClients.has(group.clientName) && (
+                      <div className="mt-2 space-y-1">
+                        {group.bills.map((b) => (
+                          <button
+                            key={b.id}
+                            type="button"
+                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs hover:bg-slate-50 transition"
+                            onClick={() => setPreviewBill(b)}
+                          >
+                            <span className="font-mono font-bold text-indigo-600">{b.bill_number}</span>
+                            <span className="text-slate-500">{formatDate(b.bill_date)}</span>
+                            <span className="ml-auto font-bold text-graphite">{formatCurrency(b.total_amount)}</span>
+                            <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                              b.status === 'paid' ? 'bg-emerald-100 text-emerald-800' : b.status === 'partial' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                            }`}>{b.status}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {clientGroupedTotals.length === 0 && (
+                  <p className="px-4 py-3 text-sm text-slate-400">No invoices match the current filters.</p>
+                )}
+              </div>
+            )}
+          </div>
+
           <SectionCard
             title="GST Invoice Register"
             action={
@@ -1102,6 +1313,40 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
                 placeholder="Filter Status"
                 widthClass="w-full"
               />
+            </div>
+            {/* Date range filter row */}
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <CalendarDays className="h-4 w-4 shrink-0 text-slate-400" />
+              <span className="text-xs font-bold text-slate-500">Date range:</span>
+              <input
+                type="date"
+                className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs outline-none focus:border-graphite"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                title="Bill date from"
+              />
+              <span className="text-xs text-slate-400">to</span>
+              <input
+                type="date"
+                className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs outline-none focus:border-graphite"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                title="Bill date to"
+              />
+              {(dateFrom || dateTo) && (
+                <button
+                  type="button"
+                  className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200 transition"
+                  onClick={() => { setDateFrom(''); setDateTo(''); }}
+                >
+                  Clear dates
+                </button>
+              )}
+              {(dateFrom || dateTo) && (
+                <span className="ml-auto text-xs font-semibold text-slate-500">
+                  {filteredBills.length} result{filteredBills.length !== 1 ? 's' : ''} in range
+                </span>
+              )}
             </div>
 
             {filteredBills.length ? (
@@ -1190,7 +1435,23 @@ function BillingWorkspace({ view }: { view: WorkspaceView }) {
                     <span key={`gst-${b.id}`} className="font-extrabold text-indigo-900 whitespace-nowrap">
                       {formatCurrency(split.gst)}
                     </span>,
-                    <span key={`tot-${b.id}`} className="font-extrabold text-graphite">{formatCurrency(b.total_amount)}</span>,
+                    <div key={`tot-${b.id}`} className="space-y-1">
+                      <span className="font-extrabold text-graphite">{formatCurrency(b.total_amount)}</span>
+                      {/* Payment progress bar */}
+                      {b.total_amount > 0 && (
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-slate-100" title={`Paid: ${formatCurrency(b.paid_amount || 0)} / Balance: ${formatCurrency(b.balance_amount || 0)}`}>
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              b.status === 'paid' ? 'bg-emerald-500' : b.status === 'partial' ? 'bg-amber-400' : 'bg-rose-300'
+                            }`}
+                            style={{ width: `${Math.min(100, ((b.paid_amount || 0) / b.total_amount) * 100)}%` }}
+                          />
+                        </div>
+                      )}
+                      {b.status !== 'paid' && Number(b.balance_amount) > 0 && (
+                        <span className="text-[10px] font-semibold text-rose-600">Due: {formatCurrency(b.balance_amount)}</span>
+                      )}
+                    </div>,
                     <div key={`stat-${b.id}`} className="flex flex-col items-start gap-1">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider ${
