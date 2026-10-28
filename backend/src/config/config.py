@@ -39,20 +39,119 @@ def _build_database_url() -> str:
         return f"postgresql+psycopg://{encoded_user}:{encoded_password}@{host}{port_part}/{name}?sslmode={sslmode}"
     return _normalize_database_url(os.getenv("DATABASE_URL", ""))
 
+def _clean_secret(val: str | None) -> str:
+    if val is None:
+        return ""
+    cleaned = val.strip()
+    if len(cleaned) >= 2:
+        if (cleaned.startswith('"') and cleaned.endswith('"')) or (
+            cleaned.startswith("'") and cleaned.endswith("'")
+        ):
+            cleaned = cleaned[1:-1].strip()
+    return cleaned
+
+
+_INSECURE_PLACEHOLDER_PREFIXES = (
+    "replace-with",
+    "your-secret",
+    "change-me",
+    "changeme",
+    "<secret",
+    "insert-secret",
+)
+_INSECURE_PLACEHOLDER_EXACT = {
+    "secret",
+    "secretkey",
+    "secret_key",
+    "placeholder",
+    "replace_with_at_least_32_random_characters",
+}
+
+
+def _detect_placeholder(val: str) -> str | None:
+    lower = val.lower()
+    for prefix in _INSECURE_PLACEHOLDER_PREFIXES:
+        if lower.startswith(prefix):
+            return prefix
+    if lower in _INSECURE_PLACEHOLDER_EXACT:
+        return lower
+    return None
+
+
 APP_NAME = os.getenv("APP_NAME", "Application")
 API_V1_STR = os.getenv("API_V1_STR", "/api/v1")
-SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
-if len(SECRET_KEY) < 32 or SECRET_KEY.startswith("replace-with"):
-    raise RuntimeError("SECRET_KEY is required and must contain at least 32 non-placeholder characters.")
+
+# Resolve secret key with supported aliases
+_raw_secret_key = os.getenv("SECRET_KEY")
+_secret_source = "SECRET_KEY"
+if _raw_secret_key is None or not _raw_secret_key.strip():
+    _jwt_secret_key = os.getenv("JWT_SECRET_KEY")
+    if _jwt_secret_key is not None and _jwt_secret_key.strip():
+        _raw_secret_key = _jwt_secret_key
+        _secret_source = "JWT_SECRET_KEY"
+    else:
+        _jwt_secret = os.getenv("JWT_SECRET")
+        if _jwt_secret is not None and _jwt_secret.strip():
+            _raw_secret_key = _jwt_secret
+            _secret_source = "JWT_SECRET"
+
+_cleaned_secret = _clean_secret(_raw_secret_key)
+
+# Safe configuration diagnostic (never prints the secret value)
+if os.getenv("VERCEL") or os.getenv("CONFIG_DEBUG"):
+    print(
+        f"[CONFIG DIAGNOSTIC] SECRET_KEY present: {_raw_secret_key is not None} | "
+        f"source: {_secret_source if _raw_secret_key is not None else 'NONE'} | "
+        f"sanitized length: {len(_cleaned_secret)}"
+    )
+
+if _raw_secret_key is None:
+    raise RuntimeError(
+        "SECRET_KEY environment variable is missing from the environment. "
+        "Please define SECRET_KEY (or JWT_SECRET_KEY) in your environment variables. "
+        "On Vercel, ensure it is added under Project Settings -> Environment Variables "
+        "for the active environment (Production, Preview, or Development) and redeploy."
+    )
+
+if not _cleaned_secret:
+    raise RuntimeError(
+        f"{_secret_source} is present in the environment but is empty or contains only whitespace/quotes. "
+        "A valid secret string with at least 32 characters is required."
+    )
+
+_placeholder_hit = _detect_placeholder(_cleaned_secret)
+if _placeholder_hit:
+    raise RuntimeError(
+        f"{_secret_source} contains an insecure placeholder value starting with '{_placeholder_hit}'. "
+        "You must replace it with a cryptographically secure random string of at least 32 characters "
+        "(e.g., generated with `python -c 'import secrets; print(secrets.token_urlsafe(48))'`)."
+    )
+
+if len(_cleaned_secret) < 32:
+    raise RuntimeError(
+        f"{_secret_source} is too short ({len(_cleaned_secret)} characters). "
+        "SECRET_KEY must contain at least 32 non-placeholder characters for secure JWT signing."
+    )
+
+SECRET_KEY = _cleaned_secret
+JWT_SECRET_KEY = SECRET_KEY
+
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "11520"))
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 DATABASE_URL = _build_database_url()
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is required. Set it to your Supabase Postgres connection string.")
+if "PROJECT_REF" in DATABASE_URL or "URL_ENCODED_PASSWORD" in DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL contains placeholder values ('PROJECT_REF' / 'URL_ENCODED_PASSWORD'). "
+        "Set it to your actual Supabase Postgres connection string."
+    )
+
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-_supabase_service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
-if not _supabase_service_role_key or _supabase_service_role_key.startswith("replace-with"):
-    _supabase_service_role_key = os.getenv("SUPABASE_KEY", "").strip()
+_raw_supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+_supabase_service_role_key = _clean_secret(_raw_supabase_key)
+if not _supabase_service_role_key or _detect_placeholder(_supabase_service_role_key):
+    _supabase_service_role_key = _clean_secret(os.getenv("SUPABASE_KEY"))
 SUPABASE_SERVICE_ROLE_KEY = _supabase_service_role_key
 # Backward-compatible alias for existing storage code and older private environments.
 SUPABASE_KEY = SUPABASE_SERVICE_ROLE_KEY
@@ -99,7 +198,9 @@ SUPABASE_PROJECT_FILES_BUCKET = os.getenv("SUPABASE_PROJECT_FILES_BUCKET", SUPAB
 SUPABASE_NOTES_BUCKET = os.getenv("SUPABASE_NOTES_BUCKET", "note-attachments")
 # Public bucket for project profile images and bill/receipt previews shown in <img> tags.
 SUPABASE_MEDIA_BUCKET = os.getenv("SUPABASE_MEDIA_BUCKET", "").strip() or "media"
-LOCAL_STORAGE_DIR = os.getenv("LOCAL_STORAGE_DIR", "").strip() or str(Path(__file__).resolve().parents[2] / "uploads")
+LOCAL_STORAGE_DIR = os.getenv("LOCAL_STORAGE_DIR", "").strip() or str(
+    (Path("/tmp") if os.getenv("VERCEL") else Path(__file__).resolve().parents[2]) / "uploads"
+)
 
 DATABASE_POOL_SIZE = int(os.getenv("DATABASE_POOL_SIZE", "5"))
 DATABASE_MAX_OVERFLOW = int(os.getenv("DATABASE_MAX_OVERFLOW", "5"))
